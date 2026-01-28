@@ -1,0 +1,121 @@
+ttICF_h03
+ &input ! Begin NAMELIST "input"
+   istart=0
+   nrun=2019103001     
+
+! Geometry and mesh:
+   igeo=1               ! 2 -> spherical symmetry
+   nz=2                 ! total number of layers (shells) in target
+   nzeven=1             ! layer # with q=qzeven
+   qzeven=1.d0          ! mass-interval progr.factor in layer #nzeven
+   nmesh(1)=100,100,100,300,100,500,100  ! number of mesh cells in layers(10/10/117),(10/117)
+   rz0(1)=0.0d0,1.20d0,3.0d0,1.830d0,4.8d0,4.512d0,4.822d0,4.912d0 ! radii of layers
+   ti0(1)=0.0d-3,0.0d0,0.0d0
+   te0(1)=0.0d-3,0.0d0,0.0d0
+
+! Material properties:
+   imatz0(1)=1,2,3,3,2  ! initial material number imat in layers
+   ifmfu0(1)=0,0,0,0,0,0  ! =1 -> layer contains thermonuclear fuel
+
+! - material imat=1:
+   propmat(1,1)=3.d0    ! EOS type: =3 -> tabular "DEITA3"
+                        ! =2-> ideal Fermi-Bol gas
+   propmat(2,1)=1.d0    ! seq.mat.number m in table: =1 -> Fe
+                        ! seq.mat.number m in table: =2 -> W
+                        ! seq.mat.number m in table: =3 -> Au
+                        ! seq.mat.number m in table: =4 -> Pb
+                        ! seq.mat.number m in table: =5 -> C
+! - material imat=2:
+   propmat(1,2)=3.d0    ! EOS type: =3 -> tabular "DEITA3"
+   propmat(2,2)=2.d0    ! seq.mat.number m in table: =2 -> Be
+
+
+! - material imat=3:
+   propmat(1,3)=3.0d0    ! EOS type: =3 -> tabular "DEITA3"
+   propmat(2,3)=3.0d0    ! seq.mat.number m in table: =3 -> Au
+
+! - material imat=4:
+    propmat(1,4)=3.0d0    ! EOS type: =3 -> tabular "DEITA3"
+    propmat(2,4)=4.0d0    ! seq.mat.number m in table: =4 ->pb
+
+! Boundary and initial conditions:
+   iflbnd=0             ! 0 -> center of symmetry at left boudary
+   roz0(1)=7.93d0,19.25d0,19.32d0,11.34d0,19.5d0,1.9d0,19.5d0 ! density in layers
+   xD0(1)=0.d0,0.d0     ! D abundance in layer
+   xT0(1)=0.d0,0.d0     ! T abundance in layer
+
+
+
+! Target drive -> all sorts of:
+   tdrfin=100.0d-1        ! drive turn-off time
+   tdrcal=0.0d0         ! time for obligatory call of DRIVE
+
+! - ion-beam drive:
+   eionb=9.0d0          ! ion energy in GeV
+   wdriv=5.40d-3         ! ion-beam power in TW
+   R1B=3.2d0            ! add, focal radius
+   R2B=1.92d0            ! focal inner radius
+   TP=100.0d-1           ! pluse time,default 100 ns
+
+
+! Thermal treatment, radiation, viscosity:
+   iitemp=4             ! 1T,2T,3T-options; =4 -> full 3T mode;
+   iifvis=1             ! =1 -> ion viscosity turned-on;  
+   iifcapei=3           ! =3 -> both e and i conduction are on;
+   iifopac=3            ! opacity model; 0 -> no mat-rad.coupling
+   Tfloor=3.d-5         ! temperature floor
+   eemin=1.d-4          ! internal energy floor in 10MJ/g
+   flle=.5d0            ! flux limit for e-th.conduction
+   flli=.5d0,           ! flux limit for i-th.conduction
+   fllr=.5d0,           ! flux limit for rad.diffusion
+
+! Thermonuclear-burn, magnetic field:
+   ifburn=.true.  ! burn starts when ignition condition fulfilled
+   kalpri=1       ! 1 -> printout info for alphas
+   iifal=1        ! 1 -> diffusion approximation for alphas
+   iifp3=1        ! 1 -> diffusion approximation for 3-MeV protons
+   iifp14=1       ! 1 -> diffusion approximation for 14-MeV protons
+   iifn14=1       ! 4 -> 14-MeV neutr.heating spread after diff.approx-n
+   iifn2=1        ! 3 -> 2.5-MeV neutron heating spread uniformly
+   Tburn0=.1d0    ! fusion burn turned off once T_i > Tburn0
+   xbfloo=1.d-9   ! minimum (floor) fuel concetration
+
+! - magnetic field:
+   iifHz=2       ! 2 -> full account of Hz for igeo=0,1
+   Hz0=3.0d-1
+   Hzmin=1.d-33
+
+
+! Runtime, printout control:
+   tfin=300.d-1
+   ncycfin=1000000
+   tprinii(1)=1.0d0,2.5d0 ! 1-st print, dt_pri (when =< 1-st print)  
+   ncycprii(1)=50000,50000
+   njpri=2
+   nddump=20000000
+   ndrlin=10000
+
+
+! Time-step control:
+   dt0=1.d-8
+   dtmin=1.d-18
+   dtmax=1.d0
+
+! - safety factors in time-step control conditions:
+   czdt=.5d0      ! safety factor in CFL condition
+   czdtq=.2d0     ! max-allowed dT/T due to heating; used for forw. dt correctn
+   czdtvt=.2d0    ! dT/T>2*czdtvt -> a bad step; used for backw. dt correction
+   czddt=.1d0     ! max-allowed relative dt increase in one step
+   czdriv=.2d0    ! accumulated dT/T+dV/V after which DRIVE is called
+   czvkin=.1d0    ! accum-d dV_j/V_j after which recalculate rates + kin.coef.
+   czTkin=.03d0   ! accum-d dV_j/V_j after which recalculate rates + kin.coef.
+
+! - artificial viscosity:
+   smu1=0.1d0
+   smu2=0.d0
+   sig=1.d0
+   tmu1=0.d0
+   tmu2=2.d0
+   sigt=0.1d0
+
+/ ! End NAMELIST "input"
